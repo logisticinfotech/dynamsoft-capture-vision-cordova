@@ -1,0 +1,52 @@
+//Just for developing plugin
+//apply plugin: 'com.android.library'
+
+buildscript {
+
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.2.2'
+    }
+}
+
+android {
+    compileSdk 34
+    defaultConfig {
+        minSdk 21
+        targetSdk 33
+    }
+    lintOptions {
+        abortOnError false
+    }
+    sourceSets {
+        main {
+            java.srcDirs += ['../android']
+        }
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+    maven {
+        url "https://download2.dynamsoft.com/maven/aar"
+    }
+}
+dependencies {
+    implementation "androidx.appcompat:appcompat:1.7.0"
+    compileOnly 'org.apache.cordova:framework:12.0.1'
+
+
+    implementation 'com.dynamsoft:dynamsoftbarcodereader:9.6.40@aar'
+    implementation 'com.dynamsoft:dynamsoftcameraenhancer:2.3.12@aar'
+}
+android {
+    packagingOptions {
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+    }
+}
