@@ -1,7 +1,8 @@
 package com.dynamsoft.cordova.handlers;
 
 
-import com.dynamsoft.dbr.BarcodeReader;
+import com.dynamsoft.license.LicenseManager;
+import com.dynamsoft.license.LicenseVerificationListener;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -13,13 +14,16 @@ public class CommonHandler {
         String license = args.getString(0);
         cordova.getThreadPool().execute(() -> {
             if (license != null) {
-                BarcodeReader.initLicense(license, (b, e) -> {
-                    if (b) {
-                        callbackContext.success();
-                    } else {
-                        callbackContext.error(e.getMessage());
-                    }
-                });
+              LicenseManager.initLicense(license, cordova.getContext(), new LicenseVerificationListener() {
+                @Override
+                public void onLicenseVerified(boolean isSuccess, Exception error) {
+                  if(!isSuccess){
+                    callbackContext.error(error.getMessage());
+                  } else {
+                    callbackContext.success();
+                  }
+                }
+              });
             } else {
                 callbackContext.error("Expected one non-null string argument.");
             }

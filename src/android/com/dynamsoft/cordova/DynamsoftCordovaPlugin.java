@@ -6,10 +6,10 @@ import com.dynamsoft.cordova.handlers.BarcodeReaderHandler;
 import com.dynamsoft.cordova.handlers.CameraEnhancerHandler;
 import com.dynamsoft.cordova.handlers.CameraViewHandler;
 import com.dynamsoft.cordova.handlers.CommonHandler;
-import com.dynamsoft.dbr.BarcodeReader;
-import com.dynamsoft.dbr.DBRLicenseVerificationListener;
 import com.dynamsoft.dce.CameraEnhancerException;
 import com.dynamsoft.dce.EnumCameraState;
+import com.dynamsoft.license.LicenseManager;
+import com.dynamsoft.license.LicenseVerificationListener;
 
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
@@ -32,7 +32,7 @@ public class DynamsoftCordovaPlugin extends CordovaPlugin {
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
-        mBarcodeReaderHandler = new BarcodeReaderHandler();
+        mBarcodeReaderHandler = new BarcodeReaderHandler(cordova);
         mCameraEnhancerHandler = new CameraEnhancerHandler(cordova, webView);
         mCameraViewHandler = mCameraEnhancerHandler.mCameraViewHandler;
     }
@@ -95,10 +95,10 @@ public class DynamsoftCordovaPlugin extends CordovaPlugin {
                 mBarcodeReaderHandler.setTextResultListener(callbackContext);
                 break;
             case "setMinImageReadingInterval":
-                mBarcodeReaderHandler.setMinImageReadingInterval(args);
+//                mBarcodeReaderHandler.setMinImageReadingInterval(args);
                 break;
             case "getMinImageReadingInterval":
-                mBarcodeReaderHandler.getMinImageReadingInterval(callbackContext);
+//                mBarcodeReaderHandler.getMinImageReadingInterval(callbackContext);
                 break;
 
             // DCE
@@ -157,17 +157,16 @@ public class DynamsoftCordovaPlugin extends CordovaPlugin {
 
     private void initLicense(String license, CallbackContext callbackContext) {
         if (license != null) {
-
-            BarcodeReader.initLicense(license, new DBRLicenseVerificationListener() {
-                @Override
-                public void DBRLicenseVerificationCallback(boolean b, Exception e) {
-                    if (b) {
-                        callbackContext.success("Init License successful.");
-                    } else {
-                        callbackContext.error(e.getMessage());
-                    }
-                }
-            });
+          LicenseManager.initLicense(license, this.cordova.getContext(), new LicenseVerificationListener() {
+            @Override
+            public void onLicenseVerified(boolean isSuccess, Exception error) {
+              if(!isSuccess){
+                callbackContext.error(error.getMessage());
+              } else {
+                callbackContext.success("Init License successful.");
+              }
+            }
+          });
         } else {
             callbackContext.error("Expected one non-null string argument.");
         }

@@ -41,8 +41,8 @@ dependencies {
     compileOnly 'org.apache.cordova:framework:12.0.1'
 
 
-    implementation 'com.dynamsoft:dynamsoftbarcodereader:9.6.40@aar'
-    implementation 'com.dynamsoft:dynamsoftcameraenhancer:2.3.12@aar'
+    implementation 'com.dynamsoft:dynamsoftbarcodereaderbundle:10.4.3002'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 }
 android {
     packagingOptions {

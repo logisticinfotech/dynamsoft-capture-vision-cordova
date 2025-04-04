@@ -3,7 +3,7 @@ package com.dynamsoft.cordova.handlers;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.dynamsoft.dce.RegionDefinition;
+import com.dynamsoft.core.basic_structures.DSRect;
 import com.dynamsoft.dce.CameraEnhancer;
 import com.dynamsoft.dce.CameraEnhancerException;
 
@@ -113,12 +113,12 @@ public class CameraEnhancerHandler {
                 regionMeasuredByPercentage = region.getInt("regionMeasuredByPercentage");
             }
 
-            RegionDefinition regionDefinition = new RegionDefinition();
-            regionDefinition.regionLeft = regionLeft;
-            regionDefinition.regionRight = regionRight;
-            regionDefinition.regionTop = regionTop;
-            regionDefinition.regionBottom = regionBottom;
-            regionDefinition.regionMeasuredByPercentage = regionMeasuredByPercentage;
+            DSRect regionDefinition = new DSRect();
+            regionDefinition.left = regionLeft;
+            regionDefinition.right = regionRight;
+            regionDefinition.top = regionTop;
+            regionDefinition.bottom = regionBottom;
+            regionDefinition.measuredInPercentage = regionMeasuredByPercentage > 0;
             try {
                 mCamera.setScanRegion(regionDefinition);
             } catch (CameraEnhancerException e) {
@@ -130,6 +130,8 @@ public class CameraEnhancerHandler {
 
     public void setScanRegionVisible(JSONArray args) throws JSONException {
         boolean isVisible = args.getBoolean(0);
-        mCamera.setScanRegionVisible(isVisible);
+//      mCamera.setScanRegionVisible(isVisible);
+      mCameraViewHandler.mCameraView.setScanRegionMaskVisible(isVisible);
+      mCameraViewHandler.mCameraView.setScanLaserVisible(isVisible);
     }
 }

@@ -36,3 +36,7 @@ View the API reference of DCV Cordova Edition to explore the full feature of DCV
 ## Contact
 
 https://www.dynamsoft.com/company/contact/
+
+- https://www.dynamsoft.com/barcode-reader/docs/mobile/programming/android/user-guide.html
+- https://www.dynamsoft.com/barcode-reader/docs/mobile/programming/objectivec-swift/user-guide.html?lang=swift 
+- https://www.dynamsoft.com/camera-enhancer/docs-archive/mobile/programming/android/guide/guide.html

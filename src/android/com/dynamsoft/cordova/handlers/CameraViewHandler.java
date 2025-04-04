@@ -5,6 +5,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
@@ -20,7 +21,8 @@ import com.dynamsoft.cordova.TorchButtonState;
 import com.dynamsoft.cordova.util.BitmapUtil;
 import com.dynamsoft.dce.CameraEnhancer;
 import com.dynamsoft.dce.CameraEnhancerException;
-import com.dynamsoft.dce.DCECameraView;
+import com.dynamsoft.dce.CameraView;
+import com.dynamsoft.dce.DrawingLayer;
 
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaWebView;
@@ -37,7 +39,7 @@ public class CameraViewHandler {
     private final CordovaWebView webView;
     private View backgroundView;
 
-    public DCECameraView mCameraView;
+    public CameraView mCameraView;
     private final Rect cameraViewRect = new Rect();// camera view that is visible
     private final Rect dstRect = new Rect(0, 0, 9, 16);
     private final Matrix mTransformMatrix = new Matrix();
@@ -53,12 +55,17 @@ public class CameraViewHandler {
         this.webView = cameraEnhancerHandler.webView;
         mDensity = Resources.getSystem().getDisplayMetrics().density;
         mUiHandler = cameraEnhancerHandler.mUiHandler;
-//        mCameraView = new DCECameraView(cordova.getActivity());
-//        initWebViewGestureListener();
+
+        // UnCommented and Updated
+        mCameraView = new CameraView(cordova.getActivity());
+        initWebViewGestureListener();
+        if (mCamera != null) {
+          mCamera.setCameraView(mCameraView);
+        }
     }
 
     public void createDCECameraViewInstance() {
-        mCameraView = new DCECameraView(cordova.getActivity());
+        mCameraView = new CameraView(cordova.getActivity());
         initWebViewGestureListener();
         if (mCamera != null) {
             mCamera.setCameraView(mCameraView);
@@ -126,7 +133,7 @@ public class CameraViewHandler {
         JSONObject viewPosition = (JSONObject) args.get(0);
         mUiHandler.post(() -> {
             try {
-                Class<? extends DCECameraView> cls = mCameraView.getClass();
+                Class<? extends CameraView> cls = mCameraView.getClass();
                 Field mTextureViewFiled = cls.getDeclaredField("mTextureView");
                 Field mScanRegionViewFiled = cls.getDeclaredField("mScanRegionView");
                 Field mCanvasViewFiled = cls.getDeclaredField("mCanvasView");
@@ -182,7 +189,10 @@ public class CameraViewHandler {
     }
 
     public void setOverlayVisible(JSONArray args) throws JSONException {
-        mCameraView.setOverlayVisible(args.getBoolean(0));
+//        mCameraView.setOverlayVisible(args.getBoolean(0));
+        DrawingLayer layer = mCameraView.getDrawingLayer(DrawingLayer.DBR_LAYER_ID);
+        // Set the visible property to true or false to control the visibility.
+        layer.setVisible(args.getBoolean(0));
     }
 
     public void setTorchButton(JSONArray args) throws JSONException {
@@ -332,7 +342,8 @@ public class CameraViewHandler {
                                     mTransformMatrix.mapPoints(dst,
                                             new float[]{touchXInCameraView, touchYInCameraView});
                                     try {
-                                        mCamera.setFocus(dst[0] / dstRect.width(), dst[1] / dstRect.height());
+                                        PointF pf = new PointF(dst[0] / dstRect.width(), dst[1] / dstRect.height());
+                                        mCamera.setFocus(pf);
                                     } catch (CameraEnhancerException cameraEnhancerException) {
                                         cameraEnhancerException.printStackTrace();
                                     }
