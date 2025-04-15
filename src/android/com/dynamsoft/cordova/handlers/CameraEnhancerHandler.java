@@ -6,6 +6,7 @@ import android.os.Looper;
 import com.dynamsoft.core.basic_structures.DSRect;
 import com.dynamsoft.dce.CameraEnhancer;
 import com.dynamsoft.dce.CameraEnhancerException;
+import com.dynamsoft.dce.utils.PermissionUtil;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -32,7 +33,7 @@ public class CameraEnhancerHandler {
         // init CameraEnhancer and DCECameraView
         mCamera = new CameraEnhancer(cordova.getActivity());
         if(mCameraViewHandler.mCameraView != null) {
-            mCamera.setCameraView(mCameraViewHandler.mCameraView);
+            mUiHandler.post(() -> mCamera.setCameraView(mCameraViewHandler.mCameraView));
         }
         try {
             mCameraViewHandler.mCamera = this.mCamera;
@@ -44,6 +45,7 @@ public class CameraEnhancerHandler {
     }
 
     public void open(CallbackContext callbackContext) {
+        PermissionUtil.requestCameraPermission(cordova.getActivity());
         mUiHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -114,11 +116,19 @@ public class CameraEnhancerHandler {
             }
 
             DSRect regionDefinition = new DSRect();
-            regionDefinition.left = regionLeft;
-            regionDefinition.right = regionRight;
-            regionDefinition.top = regionTop;
-            regionDefinition.bottom = regionBottom;
-            regionDefinition.measuredInPercentage = regionMeasuredByPercentage > 0;
+            if(regionMeasuredByPercentage > 0) {
+                regionDefinition.left = regionLeft / 100f;
+                regionDefinition.right = regionRight / 100f;
+                regionDefinition.top = regionTop / 100f;
+                regionDefinition.bottom = regionBottom / 100f;
+                regionDefinition.measuredInPercentage = true;
+            } else {
+                regionDefinition.left = regionLeft;
+                regionDefinition.right = regionRight;
+                regionDefinition.top = regionTop;
+                regionDefinition.bottom = regionBottom;
+                regionDefinition.measuredInPercentage = false;
+            }
             try {
                 mCamera.setScanRegion(regionDefinition);
             } catch (CameraEnhancerException e) {

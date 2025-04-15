@@ -57,19 +57,24 @@ public class CameraViewHandler {
         mUiHandler = cameraEnhancerHandler.mUiHandler;
 
         // UnCommented and Updated
-        mCameraView = new CameraView(cordova.getActivity());
-        initWebViewGestureListener();
-        if (mCamera != null) {
-          mCamera.setCameraView(mCameraView);
-        }
+        mUiHandler.post(()->{
+            mCameraView = new CameraView(cordova.getActivity());
+            initWebViewGestureListener();
+            if (mCamera != null) {
+                mCamera.setCameraView(mCameraView);
+            }
+        });
     }
 
     public void createDCECameraViewInstance() {
-        mCameraView = new CameraView(cordova.getActivity());
-        initWebViewGestureListener();
-        if (mCamera != null) {
-            mCamera.setCameraView(mCameraView);
-        }
+        mUiHandler.post(() -> {
+            mCameraView = new CameraView(cordova.getActivity());
+            initWebViewGestureListener();
+            if (mCamera != null) {
+                mCamera.setCameraView(mCameraView);
+            }
+        });
+
     }
 
     private void setBackGroundView() {
