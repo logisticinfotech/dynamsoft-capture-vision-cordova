@@ -34,15 +34,17 @@ public class BarcodeReaderHandler {
       this.cordova = cordova;
     }
     public void createDbrInstance(CallbackContext callbackContext) {
-        if (mReader == null) {
-//            try {
-                mReader = new CaptureVisionRouter(this.cordova.getContext());
-//            } catch (CaptureVisionRouterException e) {
-//                callbackContext.error(e.getMessage());
-//                e.printStackTrace();
-//            }
-        }
-        callbackContext.success();
+      cordova.getThreadPool().execute(() -> {
+        try {
+          if (mReader == null) {
+            mReader = new CaptureVisionRouter(this.cordova.getContext());
+          }
+          // Optionally load license or set settings
+          callbackContext.success("DBR instance created");
+        } catch (Exception e) {
+          callbackContext.error("Failed to create DBR instance: " + e.getMessage());
+         }
+      });
     }
 
     public void getVersion(CallbackContext callbackContext) {
@@ -50,22 +52,25 @@ public class BarcodeReaderHandler {
     }
 
     public void startScanning() {
+      cordova.getThreadPool().execute(() -> {
+        mReader.startCapturing(EnumPresetTemplate.PT_READ_SINGLE_BARCODE, new CompletionListener() {
+          @Override
+          public void onSuccess() {
 
-      mReader.startCapturing(EnumPresetTemplate.PT_READ_SINGLE_BARCODE, new CompletionListener() {
-        @Override
-        public void onSuccess() {
+          }
 
-        }
-
-        @Override
-        public void onFailure(int errorCode, String errorString) {
-           cordova.getActivity().runOnUiThread(() -> showDialog("Error", String.format(Locale.getDefault(), "ErrorCode: %d %nErrorMessage: %s", errorCode, errorString)));
-        }
+          @Override
+          public void onFailure(int errorCode, String errorString) {
+              cordova.getActivity().runOnUiThread(() -> showDialog("Error", String.format(Locale.getDefault(), "ErrorCode: %d %nErrorMessage: %s", errorCode, errorString)));
+          }
+        });
       });
     }
 
     public void stopScanning() {
+      cordova.getThreadPool().execute(() -> {
         mReader.stopCapturing();
+      )};
     }
 
     public void getRuntimeSettings(CallbackContext callbackContext) {

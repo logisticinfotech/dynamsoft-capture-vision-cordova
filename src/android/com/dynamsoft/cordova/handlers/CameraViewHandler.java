@@ -138,41 +138,55 @@ public class CameraViewHandler {
         JSONObject viewPosition = (JSONObject) args.get(0);
         mUiHandler.post(() -> {
             try {
-                Class<? extends CameraView> cls = mCameraView.getClass();
-                Field mTextureViewFiled = cls.getDeclaredField("mTextureView");
-                Field mScanRegionViewFiled = cls.getDeclaredField("mScanRegionView");
-                Field mCanvasViewFiled = cls.getDeclaredField("mCanvasView");
-                Field mBtnTorchFiled = cls.getDeclaredField("btnTorch");
-                mTextureViewFiled.setAccessible(true);
-                mScanRegionViewFiled.setAccessible(true);
-                mCanvasViewFiled.setAccessible(true);
-                mBtnTorchFiled.setAccessible(true);
+            //     Class<? extends CameraView> cls = mCameraView.getClass();
+            //     Field mTextureViewFiled = cls.getDeclaredField("mTextureView");
+            //     Field mScanRegionViewFiled = cls.getDeclaredField("mScanRegionView");
+            //     Field mCanvasViewFiled = cls.getDeclaredField("mCanvasView");
+            //     Field mBtnTorchFiled = cls.getDeclaredField("btnTorch");
+            //     mTextureViewFiled.setAccessible(true);
+            //     mScanRegionViewFiled.setAccessible(true);
+            //     mCanvasViewFiled.setAccessible(true);
+            //     mBtnTorchFiled.setAccessible(true);
 
-                View mTextureView = (View) mTextureViewFiled.get(mCameraView);
-                View mScanRegionView = (View) mScanRegionViewFiled.get(mCameraView);
-                View mCanvasView = (View) mCanvasViewFiled.get(mCameraView);
-                View mBtnTorch = (View) mBtnTorchFiled.get(mCameraView);
+            //     View mTextureView = (View) mTextureViewFiled.get(mCameraView);
+            //     View mScanRegionView = (View) mScanRegionViewFiled.get(mCameraView);
+            //     View mCanvasView = (View) mCanvasViewFiled.get(mCameraView);
+            //     View mBtnTorch = (View) mBtnTorchFiled.get(mCameraView);
 
-                mCameraView.setX((float) (viewPosition.getDouble("x") * mDensity));
-                mCameraView.setY((float) (viewPosition.getDouble("y") * mDensity));
-                FrameLayout.LayoutParams cameraPreviewParams = new FrameLayout.LayoutParams(
-                        (int) (viewPosition.getDouble("width") * mDensity),
-                        (int) (viewPosition.getDouble("height") * mDensity));
-                mCameraView.setLayoutParams(cameraPreviewParams);
+            //     mCameraView.setX((float) (viewPosition.getDouble("x") * mDensity));
+            //     mCameraView.setY((float) (viewPosition.getDouble("y") * mDensity));
+            //     FrameLayout.LayoutParams cameraPreviewParams = new FrameLayout.LayoutParams(
+            //             (int) (viewPosition.getDouble("width") * mDensity),
+            //             (int) (viewPosition.getDouble("height") * mDensity));
+            //     mCameraView.setLayoutParams(cameraPreviewParams);
+            //     mCameraView.requestLayout();
+            //     if (mTextureView != null) {
+            //         mTextureView.requestLayout();
+            //     }
+            //     if (mScanRegionView != null) {
+            //         mScanRegionView.requestLayout();
+            //     }
+            //     if (mCanvasView != null) {
+            //         mCanvasView.requestLayout();
+            //     }
+            //     if (mBtnTorch != null) {
+            //         mBtnTorch.requestLayout();
+            //     }
+            // } catch (JSONException | IllegalAccessException | NoSuchFieldException e) {
+            //     e.printStackTrace();
+            // }
+                float x = (float) (viewPosition.getDouble("x") * mDensity);
+                float y = (float) (viewPosition.getDouble("y") * mDensity);
+                int width = (int) (viewPosition.getDouble("width") * mDensity);
+                int height = (int) (viewPosition.getDouble("height") * mDensity);
+
+                mCameraView.setX(x);
+                mCameraView.setY(y);
+
+                FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(width, height);
+                mCameraView.setLayoutParams(params);
                 mCameraView.requestLayout();
-                if (mTextureView != null) {
-                    mTextureView.requestLayout();
-                }
-                if (mScanRegionView != null) {
-                    mScanRegionView.requestLayout();
-                }
-                if (mCanvasView != null) {
-                    mCanvasView.requestLayout();
-                }
-                if (mBtnTorch != null) {
-                    mBtnTorch.requestLayout();
-                }
-            } catch (JSONException | IllegalAccessException | NoSuchFieldException e) {
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
         });
