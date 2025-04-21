@@ -6,7 +6,7 @@ import android.os.Looper;
 import com.dynamsoft.core.basic_structures.DSRect;
 import com.dynamsoft.dce.CameraEnhancer;
 import com.dynamsoft.dce.CameraEnhancerException;
-import com.dynamsoft.dce.EnumEnhancerFeatures;
+import com.dynamsoft.dce.utils.PermissionUtil;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -30,39 +30,48 @@ public class CameraEnhancerHandler {
     }
 
     public void createDceInstance(CallbackContext callbackContext) {
+        // init CameraEnhancer and DCECameraView
+        mCamera = new CameraEnhancer(cordova.getActivity());
+        if(mCameraViewHandler.mCameraView != null) {
+            mUiHandler.post(() -> mCamera.setCameraView(mCameraViewHandler.mCameraView));
+        }
         try {
-            mCamera = new CameraEnhancer(cordova.getActivity());
-            if(mCameraViewHandler.mCameraView != null) {
-                mCamera.setCameraView(mCameraViewHandler.mCameraView);
-            }
             mCameraViewHandler.mCamera = this.mCamera;
-            callbackContext.success();
         } catch (Exception e) {
             callbackContext.error(e.getMessage());
             e.printStackTrace();
         }
+        callbackContext.success();
     }
 
     public void open(CallbackContext callbackContext) {
-        mUiHandler.post(() -> {
-            try {
-                mCamera.open();
+        PermissionUtil.requestCameraPermission(cordova.getActivity());
+        mUiHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mCamera.open();
+                } catch (CameraEnhancerException e) {
+                    callbackContext.error(e.getMessage());
+                    e.printStackTrace();
+                }
                 callbackContext.success();
-            } catch (CameraEnhancerException e) {
-                callbackContext.error(e.getMessage());
-                e.printStackTrace();
             }
         });
+
     }
 
     public void close(CallbackContext callbackContext) {
-        mUiHandler.post(() -> {
-            try {
-                mCamera.close();
+        mUiHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mCamera.close();
+                } catch (CameraEnhancerException e) {
+                    callbackContext.error(e.getMessage());
+                    e.printStackTrace();
+                }
                 callbackContext.success();
-            } catch (CameraEnhancerException e) {
-                callbackContext.error(e.getMessage());
-                e.printStackTrace();
             }
         });
     }
@@ -74,37 +83,65 @@ public class CameraEnhancerHandler {
             } else {
                 mCamera.turnOffTorch();
             }
-            callbackContext.success();
         } catch (CameraEnhancerException e) {
             callbackContext.error(e.getMessage());
         }
+        callbackContext.success();
     }
 
     public void setScanRegion(JSONArray args, CallbackContext callbackContext) throws JSONException {
-        try {
-            if (args.get(0).equals(null)) {
+        if (args.get(0).equals(null)) {
+            try {
                 mCamera.setScanRegion(null);
-            } else {
-                JSONObject region = args.getJSONObject(0);
-                DSRect regionDefinition = new DSRect();
-                regionDefinition.left = region.isNull("regionLeft") ? 0 : region.getInt("regionLeft");
-                regionDefinition.top = region.isNull("regionTop") ? 0 : region.getInt("regionTop");
-                regionDefinition.right = region.isNull("regionRight") ? 100 : region.getInt("regionRight");
-                regionDefinition.bottom = region.isNull("regionBottom") ? 100 : region.getInt("regionBottom");
-                regionDefinition.measuredInPercentage = !region.isNull("regionMeasuredByPercentage") && 
-                    region.getInt("regionMeasuredByPercentage") > 0;
-                
-                mCamera.setScanRegion(regionDefinition);
+            } catch (CameraEnhancerException e) {
+                callbackContext.error(e.getMessage());
             }
-            callbackContext.success();
-        } catch (CameraEnhancerException e) {
-            callbackContext.error(e.getMessage());
+        } else {
+            JSONObject region = args.getJSONObject(0);
+            int regionLeft = 0, regionTop = 0, regionRight = 100, regionBottom = 100, regionMeasuredByPercentage = 1;
+            if (!region.isNull("regionLeft")) {
+                regionLeft = region.getInt("regionLeft");
+            }
+            if (!region.isNull("regionTop")) {
+                regionTop = region.getInt("regionTop");
+            }
+            if (!region.isNull("regionRight")) {
+                regionRight = region.getInt("regionRight");
+            }
+            if (!region.isNull("regionBottom")) {
+                regionBottom = region.getInt("regionBottom");
+            }
+            if (!region.isNull("regionMeasuredByPercentage")) {
+                regionMeasuredByPercentage = region.getInt("regionMeasuredByPercentage");
+            }
+
+            DSRect regionDefinition = new DSRect();
+            if(regionMeasuredByPercentage > 0) {
+                regionDefinition.left = regionLeft / 100f;
+                regionDefinition.right = regionRight / 100f;
+                regionDefinition.top = regionTop / 100f;
+                regionDefinition.bottom = regionBottom / 100f;
+                regionDefinition.measuredInPercentage = true;
+            } else {
+                regionDefinition.left = regionLeft;
+                regionDefinition.right = regionRight;
+                regionDefinition.top = regionTop;
+                regionDefinition.bottom = regionBottom;
+                regionDefinition.measuredInPercentage = false;
+            }
+            try {
+                mCamera.setScanRegion(regionDefinition);
+            } catch (CameraEnhancerException e) {
+                callbackContext.error(e.getMessage());
+            }
         }
+        callbackContext.success();
     }
 
     public void setScanRegionVisible(JSONArray args) throws JSONException {
         boolean isVisible = args.getBoolean(0);
-        mCameraViewHandler.mCameraView.setScanRegionMaskVisible(isVisible);
-        mCameraViewHandler.mCameraView.setScanLaserVisible(isVisible);
+//      mCamera.setScanRegionVisible(isVisible);
+      mCameraViewHandler.mCameraView.setScanRegionMaskVisible(isVisible);
+      mCameraViewHandler.mCameraView.setScanLaserVisible(isVisible);
     }
 }
