@@ -1,6 +1,8 @@
 package com.dynamsoft.cordova;
 
 import android.annotation.SuppressLint;
+import com.dynamsoft.license.LicenseManager;
+import com.dynamsoft.license.LicenseVerificationListener;
 
 import com.dynamsoft.cordova.handlers.BarcodeReaderHandler;
 import com.dynamsoft.cordova.handlers.CameraEnhancerHandler;
@@ -42,11 +44,12 @@ public class DynamsoftCordovaPlugin extends CordovaPlugin {
         super.onReset();
         mCameraViewHandler.removeAddedView();
         try {
-            if (mCameraEnhancerHandler.mCamera != null)
-                if (mCameraEnhancerHandler.mCamera.getCameraState() != EnumCameraState.CLOSING
-                        && mCameraEnhancerHandler.mCamera.getCameraState() != EnumCameraState.CLOSED) {
+            if (mCameraEnhancerHandler.mCamera != null) {
+                int state = mCameraEnhancerHandler.mCamera.getCameraState();
+                if (state != EnumCameraState.CLOSED) {
                     mCameraEnhancerHandler.mCamera.close();
                 }
+            }
         } catch (CameraEnhancerException e) {
             e.printStackTrace();
         }
@@ -157,19 +160,18 @@ public class DynamsoftCordovaPlugin extends CordovaPlugin {
 
     private void initLicense(String license, CallbackContext callbackContext) {
         if (license != null) {
-          LicenseManager.initLicense(license, this.cordova.getContext(), new LicenseVerificationListener() {
-            @Override
-            public void onLicenseVerified(boolean isSuccess, Exception error) {
-              if(!isSuccess){
-                callbackContext.error(error.getMessage());
-              } else {
-                callbackContext.success("Init License successful.");
-              }
-            }
-          });
+            LicenseManager.initLicense(license, this.cordova.getContext(), new LicenseVerificationListener() {
+                @Override
+                public void onLicenseVerified(boolean isSuccess, Exception error) {
+                    if (!isSuccess) {
+                        callbackContext.error(error.getMessage());
+                    } else {
+                        callbackContext.success("Init License successful.");
+                    }
+                }
+            });
         } else {
             callbackContext.error("Expected one non-null string argument.");
         }
     }
-
 }

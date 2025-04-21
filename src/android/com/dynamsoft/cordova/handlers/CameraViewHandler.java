@@ -34,6 +34,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 
+// Update imports
+import com.dynamsoft.dce.DrawingItem;
+import com.dynamsoft.dce.DrawingStyle;
+
 public class CameraViewHandler {
     private final CordovaInterface cordova;
     private final CordovaWebView webView;
@@ -57,24 +61,19 @@ public class CameraViewHandler {
         mUiHandler = cameraEnhancerHandler.mUiHandler;
 
         // UnCommented and Updated
-        mUiHandler.post(()->{
-            mCameraView = new CameraView(cordova.getActivity());
-            initWebViewGestureListener();
-            if (mCamera != null) {
-                mCamera.setCameraView(mCameraView);
-            }
-        });
+        mCameraView = new CameraView(cordova.getActivity());
+        initWebViewGestureListener();
+        if (mCamera != null) {
+          mCamera.setCameraView(mCameraView);
+        }
     }
 
     public void createDCECameraViewInstance() {
-        mUiHandler.post(() -> {
-            mCameraView = new CameraView(cordova.getActivity());
-            initWebViewGestureListener();
-            if (mCamera != null) {
-                mCamera.setCameraView(mCameraView);
-            }
-        });
-
+        mCameraView = new CameraView(cordova.getActivity());
+        initWebViewGestureListener();
+        if (mCamera != null) {
+            mCamera.setCameraView(mCameraView);
+        }
     }
 
     private void setBackGroundView() {
@@ -138,15 +137,15 @@ public class CameraViewHandler {
         JSONObject viewPosition = (JSONObject) args.get(0);
         mUiHandler.post(() -> {
             try {
-            //     Class<? extends CameraView> cls = mCameraView.getClass();
-            //     Field mTextureViewFiled = cls.getDeclaredField("mTextureView");
-            //     Field mScanRegionViewFiled = cls.getDeclaredField("mScanRegionView");
-            //     Field mCanvasViewFiled = cls.getDeclaredField("mCanvasView");
-            //     Field mBtnTorchFiled = cls.getDeclaredField("btnTorch");
-            //     mTextureViewFiled.setAccessible(true);
-            //     mScanRegionViewFiled.setAccessible(true);
-            //     mCanvasViewFiled.setAccessible(true);
-            //     mBtnTorchFiled.setAccessible(true);
+                Class<? extends CameraView> cls = mCameraView.getClass();
+                Field mTextureViewFiled = cls.getDeclaredField("mTextureView");
+                Field mScanRegionViewFiled = cls.getDeclaredField("mScanRegionView");
+                Field mCanvasViewFiled = cls.getDeclaredField("mCanvasView");
+                Field mBtnTorchFiled = cls.getDeclaredField("btnTorch");
+                mTextureViewFiled.setAccessible(true);
+                mScanRegionViewFiled.setAccessible(true);
+                mCanvasViewFiled.setAccessible(true);
+                mBtnTorchFiled.setAccessible(true);
 
             //     View mTextureView = (View) mTextureViewFiled.get(mCameraView);
             //     View mScanRegionView = (View) mScanRegionViewFiled.get(mCameraView);
@@ -208,10 +207,10 @@ public class CameraViewHandler {
     }
 
     public void setOverlayVisible(JSONArray args) throws JSONException {
-//        mCameraView.setOverlayVisible(args.getBoolean(0));
         DrawingLayer layer = mCameraView.getDrawingLayer(DrawingLayer.DBR_LAYER_ID);
-        // Set the visible property to true or false to control the visibility.
-        layer.setVisible(args.getBoolean(0));
+        if (layer != null) {
+            layer.setVisible(args.getBoolean(0));
+        }
     }
 
     public void setTorchButton(JSONArray args) throws JSONException {
