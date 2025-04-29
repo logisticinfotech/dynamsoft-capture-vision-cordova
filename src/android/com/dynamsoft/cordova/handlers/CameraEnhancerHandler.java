@@ -58,7 +58,6 @@ public class CameraEnhancerHandler {
                 callbackContext.success();
             }
         });
-
     }
 
     public void close(CallbackContext callbackContext) {
@@ -140,8 +139,9 @@ public class CameraEnhancerHandler {
 
     public void setScanRegionVisible(JSONArray args) throws JSONException {
         boolean isVisible = args.getBoolean(0);
-//      mCamera.setScanRegionVisible(isVisible);
-      mCameraViewHandler.mCameraView.setScanRegionMaskVisible(isVisible);
-      mCameraViewHandler.mCameraView.setScanLaserVisible(isVisible);
+        // mCamera.setScanRegionVisible(isVisible);
+        mCameraViewHandler.mCameraView.setScanRegionMaskVisible(isVisible);
+        // mCameraViewHandler.mCameraView.setScanLaserVisible(isVisible);
+        mCameraViewHandler.mCameraView.setScanLaserVisible(false);
     }
 }
