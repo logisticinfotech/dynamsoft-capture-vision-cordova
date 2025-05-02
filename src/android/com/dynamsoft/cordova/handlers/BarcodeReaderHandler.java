@@ -2,6 +2,7 @@ package com.dynamsoft.cordova.handlers;
 
 import android.app.AlertDialog;
 import android.util.Base64;
+import android.util.Log;
 
 import com.dynamsoft.core.basic_structures.CompletionListener;
 import com.dynamsoft.core.basic_structures.EnumErrorCode;
@@ -13,6 +14,7 @@ import com.dynamsoft.cvr.EnumPresetTemplate;
 import com.dynamsoft.dbr.BarcodeResultItem;
 import com.dynamsoft.dbr.DecodedBarcodesResult;
 import com.dynamsoft.cvr.SimplifiedCaptureVisionSettings;
+import com.dynamsoft.dbr.EnumBarcodeFormat;
 import com.dynamsoft.dce.CameraEnhancer;
 import com.dynamsoft.utility.UtilityModule;
 
@@ -23,6 +25,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 public class BarcodeReaderHandler {
@@ -35,17 +38,16 @@ public class BarcodeReaderHandler {
         this.cordova = cordova;
     }
     public void createDbrInstance(CallbackContext callbackContext) {
-        cordova.getThreadPool().execute(() -> {
-            try {
-                if (mReader == null) {
-                    mReader = new CaptureVisionRouter(this.cordova.getContext());
-                }
-                // Optionally load license or set settings
-                callbackContext.success("DBR instance created");
-            } catch (Exception e) {
-                callbackContext.error("Failed to create DBR instance: " + e.getMessage());
-            }
-        });
+      cordova.getThreadPool().execute(() -> {
+        try {
+          if (mReader == null) {
+            mReader = new CaptureVisionRouter(this.cordova.getContext());
+          }
+          callbackContext.success("DBR instance created");
+        } catch (Exception e) {
+          callbackContext.error("Failed to create DBR instance: " + e.getMessage());
+        }
+      });
     }
 
     public void getVersion(CallbackContext callbackContext) {
@@ -84,7 +86,6 @@ public class BarcodeReaderHandler {
             SimplifiedCaptureVisionSettings settings = mReader.getSimplifiedSettings(EnumPresetTemplate.PT_READ_SINGLE_BARCODE);
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("barcodeFormatIds", settings.barcodeSettings.barcodeFormatIds);
-//            jsonObject.put("barcodeFormatIds_2", settings.barcodeSettings.barcodeFormatIds_2);
             jsonObject.put("expectedBarcodesCount", settings.barcodeSettings.expectedBarcodesCount);
             jsonObject.put("timeout", settings.timeout);
             callbackContext.success(jsonObject);
@@ -104,48 +105,42 @@ public class BarcodeReaderHandler {
     }
 
     public void updateRuntimeSettings(JSONArray args, CallbackContext callbackContext) throws JSONException {
-        Object settings = args.get(0);
-        if (settings instanceof String) {
-//                mReader.initSettings((String) settings, EnumConflictMode.CM_OVERWRITE);
-//                mReader.initSettings((String) settings);
-        } else if (settings instanceof Integer) {
-//                mReader.updateRuntimeSettings(EnumPresetTemplate.fromValue((int) settings));
-//                mReader.updateSettings();
-        } else if (settings instanceof JSONObject) {
-            SimplifiedCaptureVisionSettings s = null;
+      Object updateSettings = args.get(0);
+
+      if (updateSettings instanceof JSONObject) {
+        // Optionally load license or set settings
+        SimplifiedCaptureVisionSettings settings = null;
+        try {
+          settings = mReader.getSimplifiedSettings(EnumPresetTemplate.PT_READ_SINGLE_BARCODE);
+
+          if (!((JSONObject) updateSettings).isNull("barcodeFormatIds")) {
+            settings.barcodeSettings.barcodeFormatIds = ((JSONObject) updateSettings).getInt("barcodeFormatIds");
+          }
+
+          if (!((JSONObject) updateSettings).isNull("expectedBarcodesCount")) {
+            settings.barcodeSettings.expectedBarcodesCount = ((JSONObject) updateSettings).getInt("expectedBarcodesCount");
+          }
+
+          if (!((JSONObject) updateSettings).isNull("timeout")) {
+            settings.timeout = ((JSONObject) updateSettings).getInt("timeout");
+          }
+
+          mReader.updateSettings(EnumPresetTemplate.PT_READ_SINGLE_BARCODE, settings);
+        } catch (CaptureVisionRouterException e) {
+          if (e.getErrorCode() == EnumErrorCode.EC_CALL_REJECTED_WHEN_CAPTURING) {
+            // If an error occurs because capturing is in progress, stop the current capturing first, then call this function again, and then start capturing again if you want.
+            mReader.stopCapturing();
             try {
-                s = mReader.getSimplifiedSettings(EnumPresetTemplate.PT_READ_SINGLE_BARCODE);
-            } catch (CaptureVisionRouterException e) {
+                mReader.updateSettings(EnumPresetTemplate.PT_READ_SINGLE_BARCODE, settings);
+            } catch (CaptureVisionRouterException ex) {
                 e.printStackTrace();
             }
-            if (!((JSONObject) settings).isNull("barcodeFormatIds")) {
-                s.barcodeSettings.barcodeFormatIds = ((JSONObject) settings).getInt("barcodeFormatIds");
-            }
-//                if (!((JSONObject) settings).isNull("barcodeFormatIds_2")) {
-//                    s.barcodeSettings.barcodeFormatIds_2 = ((JSONObject) settings).getInt("barcodeFormatIds_2");
-//                }
-            if (!((JSONObject) settings).isNull("expectedBarcodesCount")) {
-                s.barcodeSettings.expectedBarcodesCount = ((JSONObject) settings).getInt("expectedBarcodesCount");
-            }
-            if (!((JSONObject) settings).isNull("timeout")) {
-                s.timeout = ((JSONObject) settings).getInt("timeout");
-            }
-            try {
-                mReader.updateSettings(EnumPresetTemplate.PT_READ_SINGLE_BARCODE, s);
-            } catch (CaptureVisionRouterException e) {
-                if(e.getErrorCode() == EnumErrorCode.EC_CALL_REJECTED_WHEN_CAPTURING) {
-                    // If an error occurs because capturing is in progress, stop the current capturing first, then call this function again, and then start capturing again if you want.
-                    mReader.stopCapturing();
-                    try {
-                        mReader.updateSettings(EnumPresetTemplate.PT_READ_SINGLE_BARCODE, s);
-                    } catch (CaptureVisionRouterException ex) {
-                        e.printStackTrace();
-                    }
-                    startScanning();
-                }
-            }
+            startScanning();
+          }
         }
-        callbackContext.success();
+      }
+
+      callbackContext.success();
     }
 
     public void resetRuntimeSettings() {

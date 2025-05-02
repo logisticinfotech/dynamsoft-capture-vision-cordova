@@ -66,6 +66,7 @@ public class CameraEnhancerHandler {
             public void run() {
                 try {
                     mCamera.close();
+                    mCamera.clearBuffer();
                 } catch (CameraEnhancerException e) {
                     callbackContext.error(e.getMessage());
                     e.printStackTrace();
@@ -139,9 +140,8 @@ public class CameraEnhancerHandler {
 
     public void setScanRegionVisible(JSONArray args) throws JSONException {
         boolean isVisible = args.getBoolean(0);
-        // mCamera.setScanRegionVisible(isVisible);
+//      mCamera.setScanRegionVisible(isVisible);
         mCameraViewHandler.mCameraView.setScanRegionMaskVisible(isVisible);
-        // mCameraViewHandler.mCameraView.setScanLaserVisible(isVisible);
         mCameraViewHandler.mCameraView.setScanLaserVisible(false);
     }
 }
