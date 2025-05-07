@@ -30,6 +30,7 @@ import java.util.Locale;
 
 public class BarcodeReaderHandler {
     public CaptureVisionRouter mReader;
+    public  CapturedResultReceiver capturedResultReceiver;
 
     public CordovaInterface cordova;
     private AlertDialog mAlertDialog;
@@ -77,6 +78,7 @@ public class BarcodeReaderHandler {
 
     public void stopScanning() {
         cordova.getThreadPool().execute(() -> {
+            mReader.removeResultReceiver(capturedResultReceiver);
             mReader.stopCapturing();
         });
     }
@@ -152,7 +154,7 @@ public class BarcodeReaderHandler {
     }
 
     public void setTextResultListener(CallbackContext callbackContext) {
-        mReader.addResultReceiver(new CapturedResultReceiver() {
+        mReader.addResultReceiver(capturedResultReceiver = new CapturedResultReceiver() {
             @Override
             // Implement the callback method to receive DecodedBarcodesResult.
             // The method returns a DecodedBarcodesResult object that contains an array of BarcodeResultItems.
