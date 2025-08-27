@@ -49,12 +49,7 @@ public class CameraEnhancerHandler {
         mUiHandler.post(new Runnable() {
             @Override
             public void run() {
-                try {
-                    mCamera.open();
-                } catch (CameraEnhancerException e) {
-                    callbackContext.error(e.getMessage());
-                    e.printStackTrace();
-                }
+                mCamera.open();
                 callbackContext.success();
             }
         });
@@ -64,38 +59,25 @@ public class CameraEnhancerHandler {
         mUiHandler.post(new Runnable() {
             @Override
             public void run() {
-                try {
-                    mCamera.close();
-                    mCamera.clearBuffer();
-                } catch (CameraEnhancerException e) {
-                    callbackContext.error(e.getMessage());
-                    e.printStackTrace();
-                }
+                mCamera.close();
+                mCamera.clearBuffer();
                 callbackContext.success();
             }
         });
     }
 
     public void setTorchState(JSONArray args, CallbackContext callbackContext) throws JSONException {
-        try {
-            if (args.getInt(0) == 1) {
-                mCamera.turnOnTorch();
-            } else {
-                mCamera.turnOffTorch();
-            }
-        } catch (CameraEnhancerException e) {
-            callbackContext.error(e.getMessage());
+        if (args.getInt(0) == 1) {
+            mCamera.turnOnTorch();
+        } else {
+            mCamera.turnOffTorch();
         }
         callbackContext.success();
     }
 
     public void setScanRegion(JSONArray args, CallbackContext callbackContext) throws JSONException {
         if (args.get(0).equals(null)) {
-            try {
-                mCamera.setScanRegion(null);
-            } catch (CameraEnhancerException e) {
-                callbackContext.error(e.getMessage());
-            }
+            mCamera.setScanRegion(null);
         } else {
             JSONObject region = args.getJSONObject(0);
             int regionLeft = 0, regionTop = 0, regionRight = 100, regionBottom = 100, regionMeasuredByPercentage = 1;

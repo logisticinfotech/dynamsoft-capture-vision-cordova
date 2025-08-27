@@ -342,8 +342,7 @@ public class CameraViewHandler {
                                             // current torch state is on, need to turn off torch after tap button
                                             mCamera.turnOffTorch();
                                         }
-                                    } catch (NoSuchFieldException | IllegalAccessException
-                                             | CameraEnhancerException noSuchFieldException) {
+                                    } catch (NoSuchFieldException | IllegalAccessException noSuchFieldException) {
                                         noSuchFieldException.printStackTrace();
                                     }
                                 } else {
@@ -360,12 +359,9 @@ public class CameraViewHandler {
                                     float[] dst = new float[2];
                                     mTransformMatrix.mapPoints(dst,
                                             new float[]{touchXInCameraView, touchYInCameraView});
-                                    try {
-                                        PointF pf = new PointF(dst[0] / dstRect.width(), dst[1] / dstRect.height());
-                                        mCamera.setFocus(pf);
-                                    } catch (CameraEnhancerException cameraEnhancerException) {
-                                        cameraEnhancerException.printStackTrace();
-                                    }
+
+                                    PointF pf = new PointF(dst[0] / dstRect.width(), dst[1] / dstRect.height());
+                                    mCamera.setFocus(pf);
                                 }
                             }
                         }

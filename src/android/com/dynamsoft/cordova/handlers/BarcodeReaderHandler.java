@@ -99,7 +99,7 @@ public class BarcodeReaderHandler {
 
     public void outputSettingsToString(CallbackContext callbackContext) {
         try {
-            String settings = mReader.outputSettings(EnumPresetTemplate.PT_READ_SINGLE_BARCODE);
+            String settings = mReader.outputSettings(EnumPresetTemplate.PT_READ_SINGLE_BARCODE, true);
             callbackContext.success(settings);
         } catch (CaptureVisionRouterException e) {
             throw new RuntimeException(e);

@@ -41,15 +41,11 @@ public class DynamsoftCordovaPlugin extends CordovaPlugin {
     public void onReset() {
         super.onReset();
         mCameraViewHandler.removeAddedView();
-        try {
-            if (mCameraEnhancerHandler.mCamera != null)
-                if (mCameraEnhancerHandler.mCamera.getCameraState() != EnumCameraState.CLOSING
-                        && mCameraEnhancerHandler.mCamera.getCameraState() != EnumCameraState.CLOSED) {
-                    mCameraEnhancerHandler.mCamera.close();
-                }
-        } catch (CameraEnhancerException e) {
-            e.printStackTrace();
-        }
+        if (mCameraEnhancerHandler.mCamera != null)
+            if (mCameraEnhancerHandler.mCamera.getCameraState() != EnumCameraState.CLOSING
+                    && mCameraEnhancerHandler.mCamera.getCameraState() != EnumCameraState.CLOSED) {
+                mCameraEnhancerHandler.mCamera.close();
+            }
     }
 
     @Override
