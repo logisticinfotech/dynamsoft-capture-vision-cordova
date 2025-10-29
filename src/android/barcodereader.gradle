@@ -40,7 +40,7 @@ dependencies {
     implementation "androidx.appcompat:appcompat:1.7.1"
     compileOnly 'org.apache.cordova:framework:12.0.1'
 
-    implementation 'com.dynamsoft:barcodereaderbundle:11.0.5000'
+    implementation 'com.dynamsoft:barcodereaderbundle:11.2.1000'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
 }
 android {
